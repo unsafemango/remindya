@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'services/app_icon_service.dart';
 import 'services/notification_service.dart';
 import 'state/app_state.dart';
 import 'widgets/feedback.dart';
@@ -24,6 +25,8 @@ Future<void> main() async {
     await notifications.requestPermissions();
     await state.rescheduleAll();
   }
+
+  AppIconUpdater(state, AppIconService()).start();
 
   runApp(RemindyaApp(state: state, notifications: notifications));
   WidgetsBinding.instance.addPostFrameCallback(

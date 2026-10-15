@@ -52,6 +52,16 @@ class SettingsScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
+          const _Header('App icon'),
+          SwitchListTile(
+            title: const Text('Mood app icon'),
+            subtitle: const Text(
+              'The app icon gets sad (or feral) when you ignore reminders. '
+              'On iPhone, iOS shows a short notice each time it changes.',
+            ),
+            value: state.moodIcon,
+            onChanged: state.setMoodIcon,
+          ),
           const _Header('Quiet hours'),
           SwitchListTile(
             title: const Text('Let the dog sleep at night'),

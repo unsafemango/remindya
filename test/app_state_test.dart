@@ -162,6 +162,13 @@ void main() {
     expect(reloaded.barkMode, BarkMode.always);
   });
 
+  test('mood icon setting persists', () async {
+    final s = await makeState();
+    expect(s.moodIcon, isTrue);
+    await s.setMoodIcon(false);
+    expect((await makeState()).moodIcon, isFalse);
+  });
+
   test('dateOnly strips time', () {
     expect(dateOnly(DateTime(2026, 1, 2, 3, 4)), DateTime(2026, 1, 2));
   });

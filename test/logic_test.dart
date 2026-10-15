@@ -8,6 +8,7 @@ import 'package:remindya/logic/quiet_hours.dart';
 import 'package:remindya/logic/snooze.dart';
 import 'package:remindya/logic/streak.dart';
 import 'package:remindya/models/annoyance_level.dart';
+import 'package:remindya/models/app_icon.dart';
 import 'package:remindya/models/bark_mode.dart';
 import 'package:remindya/models/reminder.dart';
 
@@ -213,6 +214,14 @@ void main() {
     expect(stages.map(BarkMode.angryNags.barksAt), [false, false, true, true]);
     expect(stages.map(BarkMode.always.barksAt), everyElement(isTrue));
     expect(BarkMode.fromName('nonsense'), BarkMode.angryNags);
+  });
+
+  test('app icon follows mood', () {
+    expect(AppIcon.fromMood(DogMood.bored), AppIcon.happy);
+    expect(AppIcon.fromMood(DogMood.ecstatic), AppIcon.happy);
+    expect(AppIcon.fromMood(DogMood.sad), AppIcon.sad);
+    expect(AppIcon.fromMood(DogMood.devastated), AppIcon.sad);
+    expect(AppIcon.fromMood(DogMood.feral), AppIcon.feral);
   });
 
   test('mood follows behavior', () {

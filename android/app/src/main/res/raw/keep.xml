@@ -2,4 +2,4 @@
 <!-- Stop R8 resource shrinking from stripping resources that are only
      referenced by name from Dart (notification sound and icon). -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@raw/bark,@mipmap/ic_launcher" />
+    tools:keep="@raw/bark,@mipmap/ic_launcher*,@drawable/ic_stat_remindya" />

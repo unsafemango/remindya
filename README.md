@@ -25,6 +25,10 @@ Remind yourself of something. If you don't do it, the dog gets sad. Then it gets
 - **Bark sound.** Notifications can play a custom "woof woof" instead of
   the default chime: off, angry nags only (default), or always. The bark is
   synthesized by `tool/make_bark.py`.
+- **Mood app icon.** The launcher icon switches between a happy (green), sad
+  (blue) and feral (red) dog as you ignore reminders. It can be turned off in
+  Settings. Android swaps launcher aliases when the app goes to the
+  background; iOS uses alternate icons and shows a short system notice.
 - **Notification actions.** Done ✅ / Snooze 😴 straight from the notification.
 - One-off, daily and weekly reminders.
 
@@ -46,6 +50,14 @@ lib/
   widgets/dog_mascot.dart         the dog
 ```
 
+## Regenerating icons
+
+All launcher, notification and iOS icons are rendered from the dog painter:
+
+```sh
+tool/generate_icons.sh   # needs flutter and ffmpeg
+```
+
 ## Running
 
 ```sh
@@ -60,7 +72,6 @@ denied, it falls back to inexact scheduling.
 
 ## Ideas for v2
 
-- Changing the app icon based on mood
 - Dog growth (puppy → adult), cosmetics bought with bones
 - Pack mode: shared reminders, leaderboards, opt-in "tattle" to a friend
 - Location-based reminders

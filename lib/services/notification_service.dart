@@ -65,7 +65,9 @@ class NotificationService implements ReminderScheduler {
     );
     await _plugin.initialize(
       settings: InitializationSettings(
-        android: const AndroidInitializationSettings('@mipmap/ic_launcher'),
+        android: const AndroidInitializationSettings(
+          '@drawable/ic_stat_remindya',
+        ),
         iOS: darwin,
       ),
       onDidReceiveNotificationResponse: _dispatch,

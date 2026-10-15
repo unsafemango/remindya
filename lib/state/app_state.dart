@@ -54,6 +54,7 @@ class AppState extends ChangeNotifier {
   AnnoyanceLevel _level = AnnoyanceLevel.goodBoy;
   QuietHours _quiet = const QuietHours();
   BarkMode _bark = BarkMode.angryNags;
+  bool _moodIcon = true;
   List<DateTime> _recentCompletions = [];
   bool _onboarded = false;
 
@@ -67,6 +68,9 @@ class AppState extends ChangeNotifier {
   AnnoyanceLevel get level => _level;
   QuietHours get quietHours => _quiet;
   BarkMode get barkMode => _bark;
+
+  /// Whether the launcher icon follows the dog's mood.
+  bool get moodIcon => _moodIcon;
   bool get onboarded => _onboarded;
 
   List<Reminder> get overdue =>
@@ -116,6 +120,7 @@ class AppState extends ChangeNotifier {
           json['quiet'] as Map<String, dynamic>? ?? const {},
         );
         _bark = BarkMode.fromName(json['bark'] as String?);
+        _moodIcon = json['moodIcon'] as bool? ?? true;
         _recentCompletions = (json['recentCompletions'] as List? ?? [])
             .map((e) => DateTime.parse(e as String))
             .toList();
@@ -152,6 +157,7 @@ class AppState extends ChangeNotifier {
       'level': _level.name,
       'quiet': _quiet.toJson(),
       'bark': _bark.name,
+      'moodIcon': _moodIcon,
       'recentCompletions': _recentCompletions
           .map((t) => t.toIso8601String())
           .toList(),
@@ -283,6 +289,12 @@ class AppState extends ChangeNotifier {
     await _save();
     notifyListeners();
     await rescheduleAll();
+  }
+
+  Future<void> setMoodIcon(bool enabled) async {
+    _moodIcon = enabled;
+    await _save();
+    notifyListeners();
   }
 
   void clearBanner() {
