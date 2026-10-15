@@ -8,12 +8,14 @@ import '../logic/dog_voice.dart';
 import '../logic/nag_plan.dart';
 import '../logic/quiet_hours.dart';
 import '../models/annoyance_level.dart';
+import '../models/bark_mode.dart';
 import '../models/reminder.dart';
 import 'reminder_scheduler.dart';
 
 const actionDone = 'done';
 const actionSnooze = 'snooze';
 const _iosCategory = 'remindya_nag';
+const _iosBarkSound = 'bark.wav';
 
 typedef NotificationActionHandler = void Function(
   String reminderId,
@@ -109,16 +111,20 @@ class NotificationService implements ReminderScheduler {
         ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
-  NotificationDetails _details(int stage) {
+  NotificationDetails _details(int stage, BarkMode bark) {
     // Escalated nags go to a louder, higher-priority channel.
     final loud = stage >= 2;
+    final barks = bark.barksAt(stage);
+    // Android fixes a channel's sound when the channel is created, so barking
+    // and non-barking nags need separate channels.
     return NotificationDetails(
       android: AndroidNotificationDetails(
-        loud ? 'remindya_nags_loud' : 'remindya_nags',
-        loud ? 'Unhinged nags' : 'Reminders',
+        '${loud ? 'remindya_nags_loud' : 'remindya_nags'}${barks ? '_bark' : ''}',
+        '${loud ? 'Unhinged nags' : 'Reminders'}${barks ? ' (bark)' : ''}',
         channelDescription: loud
             ? 'The dog is upset. These are louder.'
             : 'Your reminders, delivered by a dog.',
+        sound: barks ? const RawResourceAndroidNotificationSound('bark') : null,
         importance: loud ? Importance.max : Importance.high,
         priority: loud ? Priority.max : Priority.high,
         category: AndroidNotificationCategory.reminder,
@@ -137,6 +143,7 @@ class NotificationService implements ReminderScheduler {
       ),
       iOS: DarwinNotificationDetails(
         categoryIdentifier: _iosCategory,
+        sound: barks ? _iosBarkSound : null,
         interruptionLevel: loud
             ? InterruptionLevel.timeSensitive
             : InterruptionLevel.active,
@@ -149,6 +156,7 @@ class NotificationService implements ReminderScheduler {
     Reminder reminder,
     AnnoyanceLevel level,
     QuietHours quiet,
+    BarkMode bark,
   ) async {
     await cancel(reminder);
     final plan = buildNagPlan(reminder, level, quiet, DateTime.now());
@@ -158,7 +166,7 @@ class NotificationService implements ReminderScheduler {
         title: nag.stage == 0 ? 'Remindya 🐶' : 'Remindya 🐶 (still waiting)',
         body: nag.body,
         scheduledDate: tz.TZDateTime.from(nag.at, tz.local),
-        notificationDetails: _details(nag.stage),
+        notificationDetails: _details(nag.stage, bark),
         androidScheduleMode: _exactAlarms
             ? AndroidScheduleMode.exactAllowWhileIdle
             : AndroidScheduleMode.inexactAllowWhileIdle,
@@ -175,12 +183,12 @@ class NotificationService implements ReminderScheduler {
   }
 
   /// Fires a nag right now so you can feel the pain.
-  Future<void> sendTestNag(int stage) async {
+  Future<void> sendTestNag(int stage, BarkMode bark) async {
     await _plugin.show(
       id: 0,
       title: 'Remindya 🐶',
       body: nagMessage('test your notifications', stage),
-      notificationDetails: _details(stage),
+      notificationDetails: _details(stage, bark),
     );
   }
 }

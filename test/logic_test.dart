@@ -8,6 +8,7 @@ import 'package:remindya/logic/quiet_hours.dart';
 import 'package:remindya/logic/snooze.dart';
 import 'package:remindya/logic/streak.dart';
 import 'package:remindya/models/annoyance_level.dart';
+import 'package:remindya/models/bark_mode.dart';
 import 'package:remindya/models/reminder.dart';
 
 Reminder _reminder({DateTime? due, RepeatRule repeat = RepeatRule.none}) =>
@@ -204,6 +205,14 @@ void main() {
     expect([1, 2, 3, 4].map((i) => stageForNag(i, 4)), [1, 1, 2, 3]);
     expect(stageForNag(1, 2), 1);
     expect(stageForNag(2, 2), 2);
+  });
+
+  test('bark mode decides which stages bark', () {
+    final stages = [0, 1, 2, 3];
+    expect(stages.map(BarkMode.off.barksAt), everyElement(isFalse));
+    expect(stages.map(BarkMode.angryNags.barksAt), [false, false, true, true]);
+    expect(stages.map(BarkMode.always.barksAt), everyElement(isTrue));
+    expect(BarkMode.fromName('nonsense'), BarkMode.angryNags);
   });
 
   test('mood follows behavior', () {

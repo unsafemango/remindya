@@ -1,4 +1,5 @@
 import '../models/annoyance_level.dart';
+import '../models/bark_mode.dart';
 import '../models/reminder.dart';
 import '../logic/quiet_hours.dart';
 
@@ -9,6 +10,7 @@ abstract class ReminderScheduler {
     Reminder reminder,
     AnnoyanceLevel level,
     QuietHours quiet,
+    BarkMode bark,
   );
 
   Future<void> cancel(Reminder reminder);
@@ -20,6 +22,7 @@ class NoopScheduler implements ReminderScheduler {
     Reminder reminder,
     AnnoyanceLevel level,
     QuietHours quiet,
+    BarkMode bark,
   ) async {}
 
   @override

@@ -3,6 +3,7 @@ import 'package:remindya/logic/dog_mood.dart';
 import 'package:remindya/logic/quiet_hours.dart';
 import 'package:remindya/logic/streak.dart';
 import 'package:remindya/models/annoyance_level.dart';
+import 'package:remindya/models/bark_mode.dart';
 import 'package:remindya/models/reminder.dart';
 import 'package:remindya/services/reminder_scheduler.dart';
 import 'package:remindya/state/app_state.dart';
@@ -10,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class RecordingScheduler implements ReminderScheduler {
   final scheduled = <String>[];
+  BarkMode? lastBark;
   final cancelled = <String>[];
 
   @override
@@ -17,8 +19,10 @@ class RecordingScheduler implements ReminderScheduler {
     Reminder reminder,
     AnnoyanceLevel level,
     QuietHours quiet,
+    BarkMode bark,
   ) async {
     scheduled.add(reminder.id);
+    lastBark = bark;
   }
 
   @override
@@ -146,6 +150,16 @@ void main() {
     scheduler.scheduled.clear();
     await s.setLevel(AnnoyanceLevel.chillPup);
     expect(scheduler.scheduled, hasLength(2));
+  });
+
+  test('bark mode persists and reschedules with the new sound', () async {
+    final s = await makeState();
+    expect(s.barkMode, BarkMode.angryNags);
+    await s.addReminder(title: 'A', dueAt: now.add(const Duration(hours: 1)));
+    await s.setBarkMode(BarkMode.always);
+    expect(scheduler.lastBark, BarkMode.always);
+    final reloaded = await makeState();
+    expect(reloaded.barkMode, BarkMode.always);
   });
 
   test('dateOnly strips time', () {

@@ -22,6 +22,9 @@ Remind yourself of something. If you don't do it, the dog gets sad. Then it gets
 - **Bones.** +10 per completion, +5 if on time, −2 per snooze.
 - **Quiet hours.** Follow-up nags are skipped overnight. The reminder itself
   still fires at the time you picked.
+- **Bark sound.** Notifications can play a custom "woof woof" instead of
+  the default chime: off, angry nags only (default), or always. The bark is
+  synthesized by `tool/make_bark.py`.
 - **Notification actions.** Done ✅ / Snooze 😴 straight from the notification.
 - One-off, daily and weekly reminders.
 
@@ -57,7 +60,6 @@ denied, it falls back to inexact scheduling.
 
 ## Ideas for v2
 
-- Custom bark notification sound
 - Changing the app icon based on mood
 - Dog growth (puppy → adult), cosmetics bought with bones
 - Pack mode: shared reminders, leaderboards, opt-in "tattle" to a friend

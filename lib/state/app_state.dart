@@ -11,6 +11,7 @@ import '../logic/quiet_hours.dart';
 import '../logic/snooze.dart';
 import '../logic/streak.dart';
 import '../models/annoyance_level.dart';
+import '../models/bark_mode.dart';
 import '../models/reminder.dart';
 import '../services/reminder_scheduler.dart';
 
@@ -52,6 +53,7 @@ class AppState extends ChangeNotifier {
   int _bones = 0;
   AnnoyanceLevel _level = AnnoyanceLevel.goodBoy;
   QuietHours _quiet = const QuietHours();
+  BarkMode _bark = BarkMode.angryNags;
   List<DateTime> _recentCompletions = [];
   bool _onboarded = false;
 
@@ -64,6 +66,7 @@ class AppState extends ChangeNotifier {
   int get bones => _bones;
   AnnoyanceLevel get level => _level;
   QuietHours get quietHours => _quiet;
+  BarkMode get barkMode => _bark;
   bool get onboarded => _onboarded;
 
   List<Reminder> get overdue =>
@@ -112,6 +115,7 @@ class AppState extends ChangeNotifier {
         _quiet = QuietHours.fromJson(
           json['quiet'] as Map<String, dynamic>? ?? const {},
         );
+        _bark = BarkMode.fromName(json['bark'] as String?);
         _recentCompletions = (json['recentCompletions'] as List? ?? [])
             .map((e) => DateTime.parse(e as String))
             .toList();
@@ -147,6 +151,7 @@ class AppState extends ChangeNotifier {
       'bones': _bones,
       'level': _level.name,
       'quiet': _quiet.toJson(),
+      'bark': _bark.name,
       'recentCompletions': _recentCompletions
           .map((t) => t.toIso8601String())
           .toList(),
@@ -158,7 +163,7 @@ class AppState extends ChangeNotifier {
   /// app start (to top up nags that were dropped as "in the past").
   Future<void> rescheduleAll() async {
     for (final r in _reminders.where((r) => !r.isDone)) {
-      await _scheduler.schedule(r, _level, _quiet);
+      await _scheduler.schedule(r, _level, _quiet, _bark);
     }
   }
 
@@ -192,7 +197,7 @@ class AppState extends ChangeNotifier {
     _reminders.add(reminder);
     await _save();
     notifyListeners();
-    await _scheduler.schedule(reminder, _level, _quiet);
+    await _scheduler.schedule(reminder, _level, _quiet, _bark);
     return reminder;
   }
 
@@ -202,7 +207,7 @@ class AppState extends ChangeNotifier {
     _reminders[i] = updated;
     await _save();
     notifyListeners();
-    await _scheduler.schedule(updated, _level, _quiet);
+    await _scheduler.schedule(updated, _level, _quiet, _bark);
   }
 
   Future<void> deleteReminder(String id) async {
@@ -239,7 +244,7 @@ class AppState extends ChangeNotifier {
     await _save();
     notifyListeners();
     await _scheduler.cancel(r);
-    if (next != null) await _scheduler.schedule(updated, _level, _quiet);
+    if (next != null) await _scheduler.schedule(updated, _level, _quiet, _bark);
 
     return CompletionResult(praise(_random), earned, streakUpdate);
   }
@@ -255,7 +260,7 @@ class AppState extends ChangeNotifier {
     _reminders[_reminders.indexWhere((x) => x.id == id)] = updated;
     await _save();
     notifyListeners();
-    await _scheduler.schedule(updated, _level, _quiet);
+    await _scheduler.schedule(updated, _level, _quiet, _bark);
     return SnoozeResult(snoozeReaction(updated.snoozeCount), d);
   }
 
@@ -268,6 +273,13 @@ class AppState extends ChangeNotifier {
 
   Future<void> setQuietHours(QuietHours quiet) async {
     _quiet = quiet;
+    await _save();
+    notifyListeners();
+    await rescheduleAll();
+  }
+
+  Future<void> setBarkMode(BarkMode bark) async {
+    _bark = bark;
     await _save();
     notifyListeners();
     await rescheduleAll();

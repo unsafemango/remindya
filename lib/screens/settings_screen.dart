@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/annoyance_level.dart';
+import '../models/bark_mode.dart';
 import '../services/notification_service.dart';
 import '../state/app_state.dart';
 
@@ -32,6 +33,25 @@ class SettingsScreen extends StatelessWidget {
         children: [
           const _Header('Annoyance level'),
           AnnoyanceLevelPicker(value: state.level, onChanged: state.setLevel),
+          const _Header('Bark sound 🔊'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SegmentedButton<BarkMode>(
+              segments: [
+                for (final m in BarkMode.values)
+                  ButtonSegment(value: m, label: Text(m.label)),
+              ],
+              selected: {state.barkMode},
+              onSelectionChanged: (s) => state.setBarkMode(s.first),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+            child: Text(
+              state.barkMode.description,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
           const _Header('Quiet hours'),
           SwitchListTile(
             title: const Text('Let the dog sleep at night'),
@@ -70,12 +90,12 @@ class SettingsScreen extends StatelessWidget {
             ListTile(
               leading: const Text('🐶', style: TextStyle(fontSize: 24)),
               title: const Text('Send a polite nag'),
-              onTap: () => notifications.sendTestNag(0),
+              onTap: () => notifications.sendTestNag(0, state.barkMode),
             ),
             ListTile(
               leading: const Text('🔥', style: TextStyle(fontSize: 24)),
               title: const Text('Send an unhinged nag'),
-              onTap: () => notifications.sendTestNag(3),
+              onTap: () => notifications.sendTestNag(3, state.barkMode),
             ),
           ],
           const _Header('Stats'),
